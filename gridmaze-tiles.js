@@ -18,8 +18,9 @@
 
 var GridMaze = {};
 
-(function() {
-
+// jQuery cheat sheet: http://visualjquery.com/
+$(document).ready(function() {
+	
 /************************\
 ** Global Module State **
 \************************/
@@ -28,22 +29,14 @@ var Globals = {
 	// two-dimensional array of Tile objects
 	tiles: null,
 	
-	// Once the GridMaze module has been initialized, we assume that
-	// there is always an activeTileId.
-	activeTileId: null,
-	
-	isGridEditable: false,
-	
-	originImage: null,
-	
 	// REVIEW: What is the future of "cat mode"?  Is the real intention
 	// the idea that a tile may be an image in various degrees of
 	// rotation instead of a grid?  If so, that implies there need
 	// to be different "types" of Tile objects.
 	inCatMode: false,
-	catImage: null
+	catImage: null,
+	originImage: null
 };
-
 
 
 /**************************\
@@ -125,11 +118,10 @@ function Tile(canvas, walls) {
 function createTileArray() {
 // get array of all canvases, combine each with a randomized walls array
 
-	var arr = [];
-	var canvases = [];
-	canvases = document.getElementsByTagName("canvas");
+	var canvases = $("canvas");
 	debugOut('output2', "canvases length is " + canvases.length);
-	
+
+	var arr = [];
 	for (var c = 0; c < canvases.length; c++) {
 		var walls = [
 			createRandomized2DArray(3, 4),
@@ -141,57 +133,42 @@ function createTileArray() {
 	return arr;
 }
 
+function getTileFromCanvas(canvas) {
+	for (var index = 0; index < Globals.tiles.length; index++) {
+		if (canvas == Globals.tiles[index].canvas) {
+			return Globals.tiles[index];
+		}
+	}
+	throw "getTileFromCanvas failed";
+}
 
-
-/*************************\
-** Initializing Canvases **
-\*************************/
-
-GridMaze.setEditTilesEnvironment = function() {
-// called onload - single Tile canvas, make walls editable
-	
-	Globals.tiles = createTileArray();
-	
-	Globals.activeTileId = 0;
-
-	canvas.addEventListener("click", clickToToggleWall, false);
-	canvas.addEventListener("mousemove", updateHoverCoordinates_debug, false);
-	
-	drawTile(getActiveTile());
-};
-
-GridMaze.setMultigridEnvironment = function() {
-// called onload - multiple Tile canvases
-	
-	Globals.tiles = createTileArray();
-	Globals.activeTileId = 0;
-	
-	// http://www.cjboco.com/blog.cfm/post/javascript-and-i-need-some-closure
-	// (putting this outside the for loop makes jslint happier)
-	function makeClickFunctionForTileId(tileId) {
-		return function() {
-			setActiveTileId(tileId);
-		};
+function initializeCore(clickHandler, hoverHandler) {
+	if (Globals.tiles) {
+		throw "Gridmaze is already initialized!";
 	}
 	
-	for(var tileId = 0; tileId < Globals.tiles.length; tileId++) {
-		var tile = Globals.tiles[tileId];
+	Globals.tiles = createTileArray();
+	if (!Globals.tiles.length) {
+		throw "Gridmaze needs AT LEAST one canvas element in host HTML5 page";
+	}
+	
+	for(var index = 0; index < Globals.tiles.length; index++) {
+		var tile = Globals.tiles[index];
 		var canvas = tile.getCanvas();
 
-		canvas.addEventListener("mousedown", makeClickFunctionForTileId(tileId), false);
-		canvas.addEventListener("mousemove", updateHoverCoordinates_debug, false);
+		$(canvas).mousedown(clickHandler);
+		$(canvas).mousemove(hoverHandler);
 
 		drawTile(tile);
-	}	
-};
-
-function getActiveTile() {
-	// Our invariant is that after GridMaze module is initialized,
-	// there will always be an active tile.  
-	if (Globals.activeTileId === null) {
-		throw "GridMaze not initialized (activeTileId is null)";
 	}
-	return Globals.tiles[Globals.activeTileId];
+	
+	// Get origin image ready
+	Globals.originImage = new Image();
+	Globals.originImage.src = "origin.png";
+	
+	// Get cat image ready
+	Globals.catImage = new Image();
+	Globals.catImage.src = "crazycat.png";
 }
 
 
@@ -265,12 +242,6 @@ function drawTileCore(tile, erase) {
 function drawTile(tile) {
 	drawTileCore(tile, false);
 }
-
-GridMaze.drawActiveCanvasHack = function() {
-	// It should probably not be necessary to export the function
-	// for drawing the active canvas outside the GridMaze object.
-	drawTile(getActiveTile());
-};
 
 function drawWall(ctx, wall, length, color) {
 	
@@ -357,18 +328,6 @@ function rotateTileWallsRightNoDraw(tile) {
 ** Image Animation **
 \*******************/
 
-GridMaze.rotateLeft = function() {
-// called by "Rotate Left" button
-
-	animatedRotateTileLeft(getActiveTile());	
-};
-
-GridMaze.rotateRight = function() {
-// called by "Rotate Right" button
-
-	animatedRotateTileRight(getActiveTile());
-};
-
 function animatedRotateTile(tile, clockwise) {
 	var canvas = tile.getCanvas();
 	var ctx = canvas.getContext("2d");
@@ -450,56 +409,6 @@ function singleRotateContext(tile, ctx, img, angle) {
 	ctx.drawImage(img, 0, 0);
 }
 
-
-
-/******************\
-** Event Handlers **
-\******************/
-
-function setActiveTileId(tileId) {
-
-	//var oldCanvasID = Globals.tiles[Globals.activeTileId].getCanvas().id;
-	//document.getElementById(oldCanvasID).style = "border:0px";
-	
-	Globals.activeTileId = tileId;
-	
-	//var newCanvasID = Globals.tiles[Globals.activeTileId].getCanvas().id;
-	//document.getElementById(newCanvasID).style = "border:2px solid red";
-	
-	debugOut('output', "Active Tile = " + tileId);
-}
-
-function clickToToggleWall(e) {
-	var x = e.clientX - 8;
-	var y = e.clientY - 8;
-
-	var activeTile = getActiveTile();
-
-	var walls = activeTile.getWalls();
-	
-	debugOut('clickX', x);
-	debugOut('clickY', y);
-
-	var w = getWallFromPointMaybeNull(x, y);
-	if (w) {
-		
-		var newWalls = walls;
-		newWalls[w[0]][w[1]][w[2]] = !walls[w[0]][w[1]][w[2]];
-		activeTile.updateWalls(newWalls);
-		drawTile(activeTile);
-	}
-	
-	debugOut('output', x + ', ' + y);
-}
-
-function updateHoverCoordinates_debug(e) {
-	var x = e.clientX - 8;
-	var y = e.clientY - 8;
-
-	debugOut('hoverY', y);
-	debugOut('hoverX', x);
-}
-
 function getWallFromPointMaybeNull(x, y) {
 	var quadX;
 	var quadY;
@@ -526,21 +435,9 @@ function getWallFromPointMaybeNull(x, y) {
 	return null;
 }
 
-function showOrigin() {
-	if (!Globals.originImage) {
-		Globals.originImage = new Image();
-		Globals.originImage.src = "origin.png";
-	}
-
-	var tile = getActiveTile();
-	var canvas = tile.getCanvas();
-	var ctx = canvas.getContext("2d");
-	ctx.drawImage(Globals.originImage, 0, 0);
-}
-
 function debugOut(id, text) {
 	
-	document.getElementById(id).innerHTML = text;
+	$("#" + id).text(text);
 }
 
 function debugOutWalls(horizontalId, verticalId, walls)
@@ -561,31 +458,132 @@ function debugOutWalls(horizontalId, verticalId, walls)
 ** Cat Functions **
 \*****************/
 
-GridMaze.toggleCatMode = function() {
-// called by "Cat" button
-
-	Globals.inCatMode = !Globals.inCatMode;
-
-	// Deferred image issue affects the cat.  Must return
-	// to main loop before image will be available from browser
-	if (!Globals.catImage) {
-		Globals.catImage = new Image();
-		Globals.catImage.src = "crazycat.png";
-	}
-
-	if (Globals.inCatMode) {
-		setTimeout(insertCat, 500);
-	} else {
-		drawTile(getActiveTile());
-	}
-};
-
-function insertCat() {
-	var activeTile = getActiveTile();
-	var canvas = activeTile.getCanvas();
+function paintCatOnTile(tile) {
+	var canvas = tile.getCanvas();
 	var ctx = canvas.getContext("2d");
 	
 	ctx.drawImage(Globals.catImage, 0, 0);
 }
 
-})(); // end GridMaze module
+
+
+/*****************\
+** Exported API **
+\*****************/
+
+var ClientGlobals = {
+	// Once the GridMaze module has been initialized, we assume that
+	// there is always an activeTile.
+	activeTile: null
+};
+
+GridMaze.initializeEditable = function() {
+// called onload - make walls editable
+	
+	initializeCore(toggleWallHandler, debugHoverPointHandler);
+	ClientGlobals.activeTile = Globals.tiles[0];
+};
+
+GridMaze.initialize = function() {
+// called onload - multiple Tile canvases
+	
+	initializeCore(setActiveTileHandler, debugHoverPointHandler);
+	ClientGlobals.activeTile = Globals.tiles[0];	
+};
+
+GridMaze.rotateLeft = function() {
+// called by "Rotate Left" button
+
+	animatedRotateTileLeft(ClientGlobals.activeTile);	
+};
+
+GridMaze.rotateRight = function() {
+// called by "Rotate Right" button
+
+	animatedRotateTileRight(ClientGlobals.activeTile);
+};
+
+GridMaze.drawActiveCanvasHack = function() {
+	// It should probably not be necessary to export the function
+	// for drawing the active canvas outside the GridMaze object.
+	drawTile(ClientGlobals.activeTile);
+};
+
+GridMaze.showOrigin = function() {
+
+	var canvas = ClientGlobals.activeTile.getCanvas();
+	var ctx = canvas.getContext("2d");
+	ctx.drawImage(ClientGlobals.originImage, 0, 0);
+};
+
+GridMaze.toggleCatMode = function() {
+// called by "Cat" button
+
+	Globals.inCatMode = !Globals.inCatMode;
+
+	if (Globals.inCatMode) {
+		paintCatOnTile(ClientGlobals.activeTile);
+	} else {
+		drawTile(ClientGlobals.activeTile);
+	}
+};
+
+
+
+/******************\
+** Event Handlers **
+\******************/
+
+function setActiveTileHandler(event) {
+
+	//var oldCanvasID = Globals.activeTile.getCanvas().id;
+	//$(oldCanvasID).css("border", "0px");
+	
+	var tile = getTileFromCanvas(this);
+	ClientGlobals.activeTile = tile;
+	
+	//var newCanvasID = Globals.activeTile.getCanvas().id;
+	//$(newCanvasID).css("border", "2px solid red");
+	
+	debugOut('output', "Active Tile = " + tile.getCanvas().id);
+}
+
+function toggleWallHandler(event) {
+	// http://docs.jquery.com/Tutorials:Mouse_Position#Where_did_they_click_that_div.3F
+	var relativeX = event.pageX - this.offsetLeft;
+	var relativeY = event.pageY - this.offsetTop;
+	
+	var x = relativeX - 8;
+	var y = relativeY - 8;
+
+	var tile = getTileFromCanvas(this);
+	var walls = tile.getWalls();
+	
+	debugOut('clickX', x);
+	debugOut('clickY', y);
+
+	var w = getWallFromPointMaybeNull(x, y);
+	if (w) {
+		
+		var newWalls = walls;
+		newWalls[w[0]][w[1]][w[2]] = !walls[w[0]][w[1]][w[2]];
+		tile.updateWalls(newWalls);
+		drawTile(tile);
+	}
+	
+	debugOut('output', x + ', ' + y);
+}
+
+function debugHoverPointHandler(event) {
+	// http://docs.jquery.com/Tutorials:Mouse_Position#Where_did_they_click_that_div.3F
+	var relativeX = event.pageX - this.offsetLeft;
+	var relativeY = event.pageY - this.offsetTop;
+
+	var x = relativeX - 8;
+	var y = relativeY - 8;
+
+	debugOut('hoverY', y);
+	debugOut('hoverX', x);
+}
+
+}); // end GridMaze module
