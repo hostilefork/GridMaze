@@ -1,3 +1,23 @@
-body {	background-color: #FFFFFF;
-		padding: 0; }
+/* After modifying, be sure to check with http://jigsaw.w3.org/css-validator/ */
+
+body {
+	background-color: #FFFFFF;
+	padding: 0;
+}
 		
+/* Must supply these via CSS
+ * HTML5 canvas has no border/margin/padding attributes.
+ */
+canvas {
+	border: 0;
+	margin: 0;
+	padding: 0;
+}
+
+.blueclass {
+	color: blue;
+}
+
+.greenclass {
+	color: green;
+}

@@ -1,77 +1,61 @@
+// GridMaze "module pattern" object helps us separate the "public"
+// interface from the "private" implementation:
+//
+//     http://www.adequatelygood.com/2010/3/JavaScript-Module-Pattern-In-Depth
+//
+// Long story short: to declare something accessible by a web
+// page or other JavaScript library, we'd say inside the loading code:
+//
+//     GridMaze.publicFunction = function() { ... };
+//
+// For a private function, we declare it inside the scope of our loading
+// handler without ever doing such an assignment.
+//
+//     function privateFunction() { ... }
+//
+// By doing it this way, code outside of this file cannot directly call
+// one of the private functions.
+
+var GridMaze = {};
+
+(function() {
 
 /**************************\
 ** Initialize Wall Arrays **
 \**************************/
 
-/*
-// setup static initial wall positions
-
-var HorizontalWall0 = Create2DArray(3, 4, false);
-var VerticalWall1 = Create2DArray(3, 4, false);
-
-HorizontalWall0[0][0] = true;
-HorizontalWall0[0][1] = true;
-HorizontalWall0[0][2] = true;
-HorizontalWall0[0][3] = true;
-
-HorizontalWall0[1][2] = true;
-HorizontalWall0[1][3] = true;
-
-HorizontalWall0[2][0] = true;
-HorizontalWall0[2][1] = true;
-HorizontalWall0[2][2] = true;
-HorizontalWall0[2][3] = true;
-
-VerticalWall1[0][0] = true;
-VerticalWall1[0][1] = true;
-VerticalWall1[0][2] = true;
-VerticalWall1[0][3] = true;
-
-VerticalWall1[1][2] = true;
-VerticalWall1[1][3] = true;
-
-VerticalWall1[2][0] = true;
-VerticalWall1[2][1] = true;
-VerticalWall1[2][2] = true;
-VerticalWall1[2][3] = true;
-
-var Walls = [];
-Walls[0] = HorizontalWall0;
-Walls[1] = VerticalWall1;
-*/
-
-
-function Create2DArray(columns, rows, value) {
-  var arr = [];
-  for (var c=0;c<columns;c++) {
-     arr[c] = [];
-     for (var r=0;r<rows;r++) {
-     	arr[c][r] = value;
-     }
-  }
-  return arr;
+function create2DArray(columns, rows, value) {
+	var arr = [];
+	for (var c = 0; c < columns; c++) {
+		arr[c] = [];
+		for (var r = 0; r < rows; r++) {
+			arr[c][r] = value;
+		}
+	}
+	return arr;
 }
 
-function CreateRandomized2DArray(columns, rows) {
-  var arr = [];
-  for (var c=0;c<columns;c++) {
-     arr[c] = [];
-     for (var r=0;r<rows;r++) {
-     	var value = Math.round(Math.random()+.3);
-     	if (value==1)
-	     	arr[c][r] = true;
-	     else
-	     	arr[c][r] = false;
-     }
-  }
-  return arr;
+function createRandomized2DArray(columns, rows) {
+	var arr = [];
+	for (var c = 0; c < columns; c++) {
+		arr[c] = [];
+		for (var r = 0; r < rows; r++) {
+			var value = Math.round(Math.random() + 0.3);
+			if (value == 1) {
+				arr[c][r] = true;
+			} else {
+				arr[c][r] = false;
+			}
+		}
+	}
+	return arr;
 }
+
 
 
 /**********************\
 ** Initializing Tiles **
 \**********************/
-
 
 var Tiles = [];
 
@@ -81,50 +65,63 @@ function Tile(canvas, walls) {
 	this.canvas = canvas;
 	this.walls = walls;
 	this.updateWalls = function(wallsArray) {
-		print('newhwall', '0:[' + wallsArray[0][0] + ']1:[' + wallsArray[0][1] + ']2:[' + wallsArray[0][2] + ']');
-		print('newvwall', '0:[' + wallsArray[1][0] + ']1:[' + wallsArray[1][1] + ']2:[' + wallsArray[1][2] + ']');
+		debugOut('newhwall', 
+				'0:[' + wallsArray[0][0] + ']' +
+				'1:[' + wallsArray[0][1] + ']' +
+				'2:[' + wallsArray[0][2] + ']');
+		debugOut('newvwall',
+				'0:[' + wallsArray[1][0] + ']' +
+				'1:[' + wallsArray[1][1] + ']' +
+				'2:[' + wallsArray[1][2] + ']');
 		
-		this.walls = wallsArray
+		this.walls = wallsArray;
 		
-		print('newTileHwall', '0:[' + this.walls[0][0] + ']1:[' + this.walls[0][1] + ']2:[' + this.walls[0][2] + ']');
-		print('newTileVwall', '0:[' + this.walls[1][0] + ']1:[' + this.walls[1][1] + ']2:[' + this.walls[1][2] + ']');
-	}
+		debugOut('newTileHwall',
+				'0:[' + this.walls[0][0] + ']' +
+				'1:[' + this.walls[0][1] + ']' +
+				'2:[' + this.walls[0][2] + ']');
+		debugOut('newTileVwall',
+				'0:[' + this.walls[1][0] + ']' +
+				'1:[' + this.walls[1][1] + ']' +
+				'2:[' + this.walls[1][2] + ']');
+	};
 	this.getCanvas = function() {
 		return canvas;
-	}
+	};
 	this.getWalls = function() {
 		return walls;
-	}
+	};
 	this.getHorizontalWalls = function() {
 		return walls[0];
-	}
+	};
 	this.getVerticalWalls = function() {
 		return walls[1];
-	}
+	};
 	this.setHorizontalWalls = function(wallsArrayH) {
 		this.walls[0] = wallsArrayH;
-	}
+	};
 	this.setVerticalWalls = function(wallsArrayV) {
 		this.walls[1] = wallsArrayV;
-	}
+	};
 	this.toString = function() {
 		return "I exist";
-	}
+	};
 }
 
-
-function CreateTileArray() {
+function createTileArray() {
 // get array of all canvases, combine each with a randomized walls array
+
 	var arr = [];
 	var canvases = [];
 	canvases = document.getElementsByTagName("canvas");
-	print('output2', "canvases length is " + canvases.length);
-	for (var c=0;c<canvases.length;c++) {
+	debugOut('output2', "canvases length is " + canvases.length);
 	
-  		var walls = [];
-  		walls[0] = CreateRandomized2DArray(3, 4);
-  		walls[1] = CreateRandomized2DArray(3, 4);
-		arr[c] = new Tile(canvases[c],walls);
+	for (var c = 0; c < canvases.length; c++) {
+		var walls = [
+			createRandomized2DArray(3, 4),
+			createRandomized2DArray(3, 4)
+		];
+		arr[c] = new Tile(canvases[c], walls);
 	}
 	
 	return arr;
@@ -136,75 +133,61 @@ function CreateTileArray() {
 ** Initializing Canvases **
 \*************************/
 
+var isGridEditable = false;
 
-var gridIsEditable = 0;
-
-
-function setEditTilesEnvironment() {
+GridMaze.setEditTilesEnvironment = function() {
 // called onload - single Tile canvas, make walls editable
 	
-	Tiles = CreateTileArray();
+	Tiles = createTileArray();
 	
 	activeTileID = 0;
 
-	canvas.addEventListener("click", ClickToToggleWall, false);
+	canvas.addEventListener("click", clickToToggleWall, false);
 	canvas.addEventListener("mousemove", updateHoverCoordinates_debug, false);
 	
 	drawActiveCanvas();
-}
+};
 
-function setMultigridEnvironment() {
+GridMaze.setMultigridEnvironment = function() {
 // called onload - multiple Tile canvases
 	
-	Tiles = CreateTileArray();
+	Tiles = createTileArray();
 	
-	if(Tiles)
+	if(Tiles) {
 		activeTileID = 0;
+	}
 	
-	for(var t=0; t<Tiles.length; t++) (function(tile){
-		activeTileID = t;
+	// http://www.cjboco.com/blog.cfm/post/javascript-and-i-need-some-closure
+	// (putting this outside the for loop makes jslint happier)
+	function makeClickFunctionForTile(tile) {
+		return function() {
+			setClickedTileActive(tile);
+		};
+	}
+	
+	for(var t=0; t<Tiles.length; t++) {
 		var canvas = Tiles[t].getCanvas();
-			
-		canvas.addEventListener("mousedown", function(){setClickedTileActive(tile);}, false);
+
+		canvas.addEventListener("mousedown", makeClickFunctionForTile(t), false);
 		canvas.addEventListener("mousemove", updateHoverCoordinates_debug, false);
-	
+
+		activeTileID = t;
 		drawActiveCanvas();
-	}) (t);	
-}
-
-/*
-// from http://trephine.org/t/index.php?title=JavaScript_loop_closures
-
-var list = [ 'a', 'b', 'c' ];
-for (var i=0, l=list.length; i<l; i++) {
-  
-  var f = function(item){
-    alert(item);
-  };
-  
-  f(list[i]);
-}
-
-var list = [ 'a', 'b', 'c' ];
-for (var i=0, l=list.length; i<l; i++) (function(item){
-  setTimeout( function(){ alert(item); }, 1000 );
-})(list[i]);
-
-*/
+	}	
+};
 
 function getActiveContext() {
 	var canvas;
 	
 	if(Tiles[activeTileID].getCanvas()) {
-		// print('output', "Active Tile = " + activeTileID);
+		// debugOut('output', "Active Tile = " + activeTileID);
 		canvas = Tiles[activeTileID].getCanvas();
 	} else {
-		print('output', "No canvas!");
+		debugOut('output', "No canvas!");
 		canvas = document.getElementById("canvas00");
-
 	}
-	var ctx = canvas.getContext("2d");
 	
+	var ctx = canvas.getContext("2d");	
 	return ctx;
 }
 
@@ -212,17 +195,18 @@ function getActiveCanvas() {
 	var canvas;
 	
 	if(Tiles[activeTileID].getCanvas()) {
-		// print('output', "Active Tile = " + activeTileID);
+		// debugOut('output', "Active Tile = " + activeTileID);
 		return Tiles[activeTileID].getCanvas();
 	} else {
-		print('output', "No canvas!");
+		debugOut('output', "No canvas!");
 		return document.getElementById("canvas00");
 	}
 }
 
 
+
 /**********************************\
-** Draw Current Walls and Squares **
+** Draw Current walls and Squares **
 \**********************************/
 
 function drawActiveCanvasCore(erase) {
@@ -235,114 +219,134 @@ function drawActiveCanvasCore(erase) {
 		ctx.fillStyle = "rgb(255,255,255)";
 		ctx.fillRect(0, 0, canvas.width, canvas.height);
 	}
- 
+
 	// generate 3x3 array describing whether tiles are enclosed (t) or not (f)
-	var FilledIn = CalculateSquaresArray();
-	var squareSize = Math.round(canvas.width/3)-1;
+	var filledIn = calculateSquaresArray();
+	var squareSize = Math.round(canvas.width / 3) - 1;
 	
-	// use FilledIn to draw each tile with correct color
-	for (var x=0; x<FilledIn.length; x++) {
-		for (var y=0; y<FilledIn.length; y++) {
-			if (FilledIn[x][y])
+	// use filledIn to draw each tile with correct color
+	for (var x = 0; x < filledIn.length; x++) {
+		for (var y = 0; y < filledIn.length; y++) {
+			if (filledIn[x][y]) {
 				ctx.fillStyle = "rgb(75,100,230)";
-			else
-				ctx.fillStyle = "rgb(235, 235, 235)";
-			ctx.fillRect(x*squareSize+1, y*squareSize+1, squareSize, squareSize);
+			} else {
+				ctx.fillStyle = "rgb(235,235,235)";
+			}
+			ctx.fillRect(
+					x * squareSize + 1,
+					y * squareSize + 1,
+					squareSize,
+					squareSize);
 		}
 	}
 
 	// set default wall color (med grey)
 	var strokeColor = "rgb(200,200,200)";
 	
-	var Walls = Tiles[activeTileID].getWalls();
+	var walls = Tiles[activeTileID].getWalls();
 	
-	// use Walls (HorizontalWall) to draw horizontal wall positions
-	for (var x=0;x<Walls[0].length;x++) {
-		for (var y=0;y<Walls[0][0].length;y++) {
-			if (Walls[0][x][y])
+	// use walls (HorizontalWall) to draw horizontal wall positions
+	for (var xh = 0; xh < walls[0].length; xh++) {
+		for (var yh = 0; yh < walls[0][0].length; yh++) {
+			if (walls[0][xh][yh]) {
 				strokeColor = "rgb(0,0,0)";
-			else
+			} else {
 				strokeColor = "rgb(200,200,200)";
-			DrawWall(ctx, [0, x, y], squareSize, strokeColor);
+			}
+			drawWall(ctx, [0, xh, yh], squareSize, strokeColor);
 		}
 	}
 	
-	// use Walls (VerticalWall) to draw vertical wall positions
-	for (var x=0;x<Walls[1].length;x++) {
-		for (var y=0;y<Walls[1][0].length;y++) {
-			if (Walls[1][x][y])
+	// use walls (VerticalWall) to draw vertical wall positions
+	for (var xv = 0; xv < walls[1].length; xv++) {
+		for (var yv = 0; yv<walls[1][0].length; yv++) {
+			if (walls[1][xv][yv]) {
 				strokeColor = "rgb(0,0,0)";
-			else
+			} else {
 				strokeColor = "rgb(200,200,200)";
-			DrawWall(ctx, [1, x, y], squareSize, strokeColor);
+			}
+			drawWall(ctx, [1, xv, yv], squareSize, strokeColor);
 		}
 	}
 	
-	
-	
-	print('horizontalwall', '0:[' + Walls[0][0] + ']1:[' + Walls[0][1] + ']2:[' + Walls[0][2] + ']');
-	print('verticalwall', '0:[' + Walls[1][0] + ']1:[' + Walls[1][1] + ']2:[' + Walls[1][2] + ']');
+	debugOut('horizontalwall',
+			'0:[' + walls[0][0] + ']' +
+			'1:[' + walls[0][1] + ']' +
+			'2:[' + walls[0][2] + ']');
+	debugOut('verticalwall',
+			'0:[' + walls[1][0] + ']' +
+			'1:[' + walls[1][1] + ']' +
+			'2:[' + walls[1][2] + ']');
 }
 
 function drawActiveCanvas() {
 	drawActiveCanvasCore(false);
 }
 
-function DrawWall(ctx, wall, length, color) {
+GridMaze.drawActiveCanvasHack = function() {
+	// It should probably not be necessary to export the function
+	// for drawing the active canvas outside the GridMaze object.
+	drawActiveCanvas();
+};
+
+function drawWall(ctx, wall, length, color) {
 	
-	if (wall == [])
+	if (wall == []) {
 		return;
+	}
 		
 	ctx.strokeStyle = color;
-	if (wall[0] == 0) {
-		ctx.strokeRect(wall[1]*length, wall[2]*length, length, 2);
-	}
-	if (wall[0] == 1) {
-		ctx.strokeRect(wall[2]*length, wall[1]*length, 2, length);
+	if (wall[0]) {
+		ctx.strokeRect(wall[1] * length, wall[2] * length, length, 2);
+	} else {
+		ctx.strokeRect(wall[2] * length, wall[1] * length, 2, length);
 	}
 }
 
-
-function CalculateSquaresArray() {
+function calculateSquaresArray() {
 // generate 3x3 array describing whether tiles are enclosed (t) or not (f)
 
-	var result = Create2DArray(3, 3, false);
+	var result = create2DArray(3, 3, false);
 	
-	for (var x=0; x<result.length; x++) {
-		for (var y=0; y<result[0].length; y++) {
-			result[x][y] = IsSurroundedByWalls(x, y);
+	for (var x = 0; x < result.length; x++) {
+		for (var y = 0; y < result[0].length; y++) {
+			result[x][y] = isSurroundedByWalls(x, y);
 		}	
 	}	
 	return result;
 }
 
-
-function IsSurroundedByWalls(x, y) {
+function isSurroundedByWalls(x, y) {
 // determine whether a square is surrounded on all four sides by walls
 	var hWalls = Tiles[activeTileID].getHorizontalWalls();
 	var vWalls = Tiles[activeTileID].getVerticalWalls();
 	
-	var topAndBottom = hWalls[x][y] && hWalls[x][y+1];
-	var sides = vWalls[y][x] && vWalls[y][x+1];
+	var topAndBottom = hWalls[x][y] && hWalls[x][y + 1];
+	var sides = vWalls[y][x] && vWalls[y][x + 1];
 	return sides && topAndBottom;
 }
 
-
-function RotateWallsArrayLeft() {
+function rotateWallsArrayLeft() {
 // rotate the entire array of walls counter-clockwise, without drawing
-// Walls[0] = Horizontal, [1] = Vertical
+// walls[0] = Horizontal, [1] = Vertical
 
- 	print('output', 'Rotating Walls Array counter-clockwise!');
+	debugOut('output', 'Rotating walls Array counter-clockwise!');
 	
 	var oWalls = Tiles[activeTileID].getWalls();
 	var newWalls = [oWalls[1], oWalls[0]];
 	
-	print('oldhwall', '0:[' + oWalls[0][0] + ']1:[' + oWalls[0][1] + ']2:[' + oWalls[0][2] + ']');
-	print('oldvwall', '0:[' + oWalls[1][0] + ']1:[' + oWalls[1][1] + ']2:[' + oWalls[1][2] + ']');
+	debugOut('oldhwall',
+			'0:[' + oWalls[0][0] + ']' +
+			'1:[' + oWalls[0][1] + ']' +
+			'2:[' + oWalls[0][2] + ']');
+	debugOut('oldvwall',
+			'0:[' + oWalls[1][0] + ']' +
+			'1:[' + oWalls[1][1] + ']' +
+			'2:[' + oWalls[1][2] + ']');
 	
 	newWalls[1].reverse();
 	
-	for (var x=0;x<newWalls[0].length;x++) {
+	for (var x = 0; x < newWalls[0].length; x++) {
 		newWalls[0][x].reverse();
 	}
 
@@ -350,23 +354,29 @@ function RotateWallsArrayLeft() {
 	Tiles[activeTileID].setVerticalWalls(newWalls[1]);
 }
 
-function RotateWallsArrayRight() {
+function rotateWallsArrayRight() {
 // rotate the entire array of walls clockwise, without drawing
-// Walls[0] = Horizontal, [1] = Vertical
+// walls[0] = Horizontal, [1] = Vertical
 
-	print('output', 'Rotating Walls Array clockwise!');
+	debugOut('output', 'Rotating walls Array clockwise!');
 	
 	var oWalls = [];
 	oWalls = Tiles[activeTileID].getWalls();
 	var newWalls = [];
 	newWalls = [oWalls[1], oWalls[0]];
 	
-	print('oldhwall', '0:[' + oWalls[0][0] + ']1:[' + oWalls[0][1] + ']2:[' + oWalls[0][2] + ']');
-	print('oldvwall', '0:[' + oWalls[1][0] + ']1:[' + oWalls[1][1] + ']2:[' + oWalls[1][2] + ']');
+	debugOut('oldhwall',
+			'0:[' + oWalls[0][0] + ']' +
+			'1:[' + oWalls[0][1] + ']' +
+			'2:[' + oWalls[0][2] + ']');
+	debugOut('oldvwall', 
+			'0:[' + oWalls[1][0] + ']' +
+			'1:[' + oWalls[1][1] + ']' +
+			'2:[' + oWalls[1][2] + ']');
 	
 	newWalls[0].reverse();
 	
-	for (var x=0;x<newWalls[1].length;x++) {
+	for (var x = 0; x < newWalls[1].length; x++) {
 		newWalls[1][x].reverse();
 	}
 	
@@ -375,12 +385,12 @@ function RotateWallsArrayRight() {
 }
 
 
+
 /*******************\
 ** Image Animation **
 \*******************/
 
-
-function RotateLeft() {
+GridMaze.rotateLeft = function() {
 // called by "Rotate Left" button
 
 	var ctx = getActiveContext();
@@ -389,13 +399,14 @@ function RotateLeft() {
 	var img = new Image();
 	img.src = Tiles[activeTileID].getCanvas().toDataURL("image/png");
 	
-	AnimatedRotateLeft(ctx, img);
+	animatedRotateLeft(ctx, img);
 	
-	//if(CatMode != 1)
-		setTimeout(function(){RotateWallsArrayLeft();},500);
-}
+	if(true || !inCatMode) {
+		setTimeout(rotateWallsArrayLeft, 500);
+	}
+};
 
-function RotateRight() {
+GridMaze.rotateRight = function() {
 // called by "Rotate Right" button
 
 	var ctx = getActiveContext();
@@ -403,14 +414,14 @@ function RotateRight() {
 	var img = new Image();
 	img.src = Tiles[activeTileID].getCanvas().toDataURL("image/png");
 	
-	AnimatedRotateRight(ctx, img);
+	animatedRotateRight(ctx, img);
 
-	//if(CatMode != 1)
-		setTimeout(function(){RotateWallsArrayRight();},500);
-}
+	if(true || !inCatMode) {
+		setTimeout(rotateWallsArrayRight, 500);
+	}
+};
 
-
-function AnimatedRotate(ctx, img, clockwise) {
+function animatedRotate(ctx, img, clockwise) {
 	var steps = 5;
 	
 	var rotorClosure = function() {
@@ -424,7 +435,7 @@ function AnimatedRotate(ctx, img, clockwise) {
 			ctx.restore();
 			drawActiveCanvas();
 		}
-	}
+	};
 	
 	ctx.save();
 	
@@ -444,14 +455,14 @@ function AnimatedRotate(ctx, img, clockwise) {
 	window.setTimeout(rotorClosure, 0);	
 }
 
-function AnimatedRotateLeft(ctx, img) {
-	print('output', 'Animating counter-clockwise rotation!');
-	AnimatedRotate(ctx, img, false);
+function animatedRotateLeft(ctx, img) {
+	debugOut('output', 'Animating counter-clockwise rotation!');
+	animatedRotate(ctx, img, false);
 }
 
-function AnimatedRotateRight(ctx, img) {
-	print('output', 'Animating clockwise rotation!');
-	AnimatedRotate(ctx, img, true);
+function animatedRotateRight(ctx, img) {
+	debugOut('output', 'Animating clockwise rotation!');
+	animatedRotate(ctx, img, true);
 }
 
 function singleRotate(ctx, img, angle) {
@@ -460,17 +471,20 @@ function singleRotate(ctx, img, angle) {
 	ctx.fillStyle = "rgb(255,255,255)";
 	
 	// additional pixel buffer to eliminate artifact lines
-	ctx.fillRect(-1, -1, Tiles[activeTileID].getCanvas().width+2, Tiles[activeTileID].getCanvas().height+2);
+	ctx.fillRect(
+			-1,
+			-1,
+			Tiles[activeTileID].getCanvas().width + 2, 
+			Tiles[activeTileID].getCanvas().height + 2);
 	
-	ctx.translate(150,150);
-	ctx.rotate(angle * Math.PI/180);
-	ctx.translate(-150,-150);
+	ctx.translate(150, 150);
+	ctx.rotate(angle * Math.PI / 180);
+	ctx.translate(-150, -150);
 	
 	// If this fails on Firefox, see comments regarding rotorClosure
 	// http://tinymce.moxiecode.com/punbb/viewtopic.php?pid=74384
 	ctx.drawImage(img, 0, 0);
 }
-
 
 
 
@@ -488,41 +502,39 @@ function setClickedTileActive(t) {
 	//var newCanvasID = Tiles[activeTileID].getCanvas().id;
 	//document.getElementById(newCanvasID).style = "border:2px solid red";
 	
-	
-	print('output', "Clicked Tile = " + t);
+	debugOut('output', "Clicked Tile = " + t);
 }
 
-function ClickToToggleWall(e) {
+function clickToToggleWall(e) {
 	var x = e.clientX - 8;
 	var y = e.clientY - 8;
-	var Walls = Tiles[activeTileID].getWalls();
-	var newWalls = Walls;
+	var walls = Tiles[activeTileID].getWalls();
+	var newWalls = walls;
 	var w = null;
 	
-	print('clickX', x);
-	print('clickY', y);
+	debugOut('clickX', x);
+	debugOut('clickY', y);
 	
-	w = GetWallFromCoordinates(x, y);
+	w = getWallFromPointMaybeNull(x, y);
 	
-	if (w != null) {
-		newWalls[w[0]][w[1]][w[2]] = !Walls[w[0]][w[1]][w[2]];
+	if (w !== null) {
+		newWalls[w[0]][w[1]][w[2]] = !walls[w[0]][w[1]][w[2]];
 	}
 	
 	Tiles[activeTileID].updateWalls(newWalls);
 	drawActiveCanvas();
-	print('output', x + ', ' + y);
+	debugOut('output', x + ', ' + y);
 }
 
 function updateHoverCoordinates_debug(e) {
 	var x = e.clientX - 8;
 	var y = e.clientY - 8;
 
-	print('hoverY', y);
-	print('hoverX', x);
+	debugOut('hoverY', y);
+	debugOut('hoverX', x);
 }
 
-
-function GetWallFromCoordinates(x, y) {
+function getWallFromPointMaybeNull(x, y) {
 	var quadX;
 	var quadY;
 	
@@ -532,16 +544,16 @@ function GetWallFromCoordinates(x, y) {
 		
 		//test for proximity to horizontal wall
 		if ((y % 100 < 25) || (y % 100 > 75)) {
-			quadX = Math.round((x-26)/100);
-			quadY = Math.round(y/100);
+			quadX = Math.round((x - 26) / 100);
+			quadY = Math.round(y / 100);
 			return [0, quadX, quadY];
 		}
 	} else if ((x % 100 < 25) || (x % 100 > 75)) {		
 	
 		//test for proximity to vertical wall
 		if ((y % 100 > 25) && (y % 100 < 75)) {
-			quadX = Math.round(x/100);
-			quadY = Math.round((y-26)/100);
+			quadX = Math.round(x / 100);
+			quadY = Math.round((y - 26) / 100);
 			return [1, quadY, quadX];
 		}
 	}
@@ -553,54 +565,41 @@ origin.src = "origin.png";
 
 function showOrigin() {
 	var ctx = getActiveContext();
-	ctx.drawImage(origin,0,0);
+	ctx.drawImage(origin, 0, 0);
 }
 
-
-function print(id, text) {
+function debugOut(id, text) {
 	
 	document.getElementById(id).innerHTML = text;
 }
+
 
 
 /*****************\
 ** Cat Functions **
 \*****************/
 
-var CatMode = 0;
+var inCatMode = false;
 
-function ToggleCatMode() {
+GridMaze.toggleCatMode = function() {
 // called by "Cat" button
 
-	CatMode = !CatMode;
+	inCatMode = !inCatMode;
 	
-	if(CatMode == 1)
-		InsertCat();
-	else
+	if (inCatMode) {
+		insertCat();
+	} else {
 		drawActiveCanvas();
-		
-}
+	}
+};
 
-
-function InsertCat() {
+function insertCat() {
 	var ctx = getActiveContext();
 
 	var img = new Image();
 	img.src = "crazycat.png";
 	
-	ctx.drawImage(img,0,0);
-	
+	ctx.drawImage(img, 0, 0);
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
+})(); // end GridMaze module

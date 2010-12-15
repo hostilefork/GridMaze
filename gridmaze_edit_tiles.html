@@ -1,45 +1,49 @@
-<!DOCTYPE html SYSTEM "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html>
+<!-- After modifying, check the HTML5 with: http://validator.w3.org/ -->
+<html>
 	<head>
-        <script src="gridmaze-tiles.js" type="text/javascript"></script>
-    </head>
-    <body onload="setEditTilesEnvironment()">
-    	
-        <canvas id="canvas00" width="302" height="302"></canvas>
-        <canvas id="canvas10" width="302" height="302"></canvas>
-        <br />
-        <button onClick="RotateLeft()">Rotate Left</button>
-        <button onClick="RotateRight()">Rotate Right</button>
-        <button onClick="ToggleCatMode()">Cat</button>
-        <br/><br />
-        <h1>Edit Tiles</h1>
-        <div id="debug" style="background-color:#FFFFAF">
-        <p>Hover: <b id="hoverX">x</b><b>,</b> <b id="hoverY">y</b></p>
-        <p>Last Click: <b id="clickX">x</b><b>,</b> <b id="clickY">y</b></p>
-        <font color="red"><p id="output"> </p><p id="output2"> </p></font>
-        <p>Old Walls:</p>
-        <font color="blue"><p id="oldhwall"> </p><p id="oldvwall"></p></font>
-        <p>New Walls:</p>
-        <font color="blue"><p id="newhwall"> </p><p id="newvwall"></p></font>
-        <p>New Tile Walls:</p>
-        <font color="green"><p id="newTileHwall"></p><p id="newTileVwall"></p></font>
-        <p>HorizontalWall:</p>
-        <p id="horizontalwall"></p>
-        <p>VerticalWall:</p>
-        <p id="verticalwall"></p>
-        </div>
-        
+		<title>GridMaze/gridmaze_edit_tiles.html</title>
+		<script src="gridmaze-tiles.js" type="text/javascript"></script>
+		<script type="text/javascript">
+			// http://stackoverflow.com/questions/559150/best-practice-for-using-window-onload
+			window.onload = function() {
+				GridMaze.setMultigridEnvironment();
+			};
+		</script>
+	</head>
+	<body>
+		<canvas id="canvas00" width="302" height="302"></canvas>
+		<canvas id="canvas10" width="302" height="302"></canvas>
+		<br />
+		<button onClick="GridMaze.rotateLeft()">Rotate Left</button>
+		<button onClick="GridMaze.rotateRight()">Rotate Right</button>
+		<button onClick="GridMaze.toggleCatMode()">Cat</button>
+		<br/><br />
+		<h1>Edit Tiles</h1>
+		<div id="debug" style="background-color:#FFFFAF">
+		<p>Hover: <b id="hoverX">x</b><b>,</b> <b id="hoverY">y</b></p>
+		<p>Last Click: <b id="clickX">x</b><b>,</b> <b id="clickY">y</b></p>
+		<p class="redclass" id="output"> </p><p class="redclass" id="output2"> </p>
+		<p>Old Walls:</p>
+		<p class="blueclass" id="oldhwall"> </p><p class="blueclass" id="oldvwall"></p>
+		<p>New Walls:</p>
+		<p class="blueclass" id="newhwall"> </p><p class="blueclass" id="newvwall"></p>
+		<p>New Tile Walls:</p>
+		<p class="greenclass"><p id="newTileHwall"></p><p id="newTileVwall"></p>
+		<p>HorizontalWall:</p>
+		<p id="horizontalwall"></p>
+		<p>VerticalWall:</p>
+		<p id="verticalwall"></p>
+		</div>
 		
 		<h2>To do:</h2>
-			<ul>
-				<li>Fix Multigrid page</li>
-				<li>Make coordinate math work on any canvases</li>
-				<li>Create meta-grid of tiles</li>
-				<li>Allow selection of active tile</li>
-				<li>Rotate individual tiles</li>
-				
-			</ul>
-        
-    </body>
-    
+		<ul>
+			<li>Fix Multigrid page</li>
+			<li>Make coordinate math work on any canvases</li>
+			<li>Create meta-grid of tiles</li>
+			<li>Allow selection of active tile</li>
+			<li>Rotate individual tiles</li>	
+		</ul>
+	</body>
 </html>
+
