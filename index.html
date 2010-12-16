@@ -2,61 +2,32 @@
 <!-- After modifying, check the HTML5 with: http://validator.w3.org/ -->
 <html>
 	<head>
-		<title>GridMaze/index.html</title>
+		<title>Welcome to Gridmaze</title>
 
 		<!-- Google hosted library: http://code.google.com/apis/libraries/devguide.html -->
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js" type="text/javascript"></script>
-
-		<script src="gridmaze-tiles.js" type="text/javascript"></script>
-		<link rel="stylesheet" type="text/css" href="gridmaze.css" />
-		
-		<script type="text/javascript">
-			// http://stackoverflow.com/questions/559150/best-practice-for-using-window-onload
-			$(function() {
-				GridMaze.initialize();
-			});
-		</script>
 	</head>
 	<body>
-		<canvas id="canvas00" width="302" height="302"></canvas>
-		<canvas id="canvas10" width="302" height="302"></canvas>
-		<canvas id="canvas20" width="302" height="302"></canvas>
-		<br />
-		<canvas id="canvas01" width="302" height="302"></canvas>
-		<canvas id="canvas11" width="302" height="302"></canvas>
-		<canvas id="canvas21" width="302" height="302"></canvas>
-		<br />
-		Click on one of the six "tiles", then click the rotate buttons below!<br />
-		<button onClick="GridMaze.rotateLeft()">Rotate Left</button>
-		<button onClick="GridMaze.rotateRight()">Rotate Right</button>
-		<!--
-		<button onClick="ToggleCatMode()">Cat</button>
-		<button onClick="showOrigin()">Origin</button>
-		-->
-		<button onClick="GridMaze.drawActiveCanvasHack()">Redraw</button>
-		<br/><br />
-		<h1>Multigrid</h1>
-		<div id="debug" style="background-color:#FFFFAF">
-		<p>Hover: <b id="hoverX">x</b><b>,</b> <b id="hoverY">y</b></p>
-		<p>Last Click: <b id="clickX">x</b><b>,</b> <b id="clickY">y</b></p>
-		<p class="redclass" id="output"> </p><p class="redclass" id="output2"> </p>
-		<p>Old Walls:</p>
-		<p class="blueclass" id="oldhwall"> </p><p class="blueclass" id="oldvwall"></p>
-		<p>New Walls:</p>
-		<p class="blueclass" id="newhwall"> </p><p class="blueclass" id="newvwall"></p>
-		<p>New Tile Walls:</p>
-		<p class="greenclass" id="newTileHwall"></p><p class="greenclass" id="newTileVwall"></p>
-		<p>HorizontalWall:</p>
-		<p id="horizontalwall"></p>
-		<p>VerticalWall:</p>
-		<p id="verticalwall"></p>
-		</div>
-		
+		<h2>Goal:</h2>
+		<p>GridMaze is an experiment with the
+		<a href="http://en.wikipedia.org/wiki/Canvas_element">HTML5 canvas</a>
+		element.  It is based on a concept for gameplay in which mazes are made 
+		up of tiles which can be rotated by the player.  It is in very early stages
+		of "pre-development", and is hosted on GitHub:</p>
+		<blockquote>
+			<p><a href="https://github.com/elj/GridMaze">https://github.com/elj/GridMaze</a></p>
+		</blockquote>
+		<h2>Pages:</h2>
+		<ul>
+			<li><a href="gridmaze-test.html">Tile Library Test</a></li>
+			<li><a href="gridmaze-game.html">"Game"</a></li>
+			<li><a href="gridmaze-editor.html">"Level Editor"</a></li>
+		</ul>
 		<h2>To do:</h2>
 		<ul>
-			<li>Fix Multigrid page</li>
+			<li>Choose license and make README</li>
+			<li>Figure out why wrong walls are selected in editor</li>
 			<li>Make coordinate math work on any canvas size</li>
-			<li>Rotate individual tiles</li>
 			<li>Add image pre-loading</li>
 			<li>Figure out why Origin + Redraw breaks rotate buttons in firefox and chrome, but not safari or opera</li>
 		</ul>
