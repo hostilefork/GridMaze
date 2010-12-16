@@ -13,7 +13,7 @@ $(document).ready(function() {
 		$("#" + id).text(text);
 	}
 	
-	function setActiveTileHandler(event) {
+	function focusTileHandler(event) {
 		//var oldCanvasID = Globals.activeTile.getCanvas().id;
 		//$(oldCanvasID).css("border", "0px");
 	
@@ -26,16 +26,19 @@ $(document).ready(function() {
 		debugOut('output', "Active Tile = " + tile.getCanvas().id);
 	}
 	
+	// Code local to this module that runs only once...
 	(function() {
-		var config = new GridMaze.Config();
+		GridMaze.initialize({
+			debugOutCallback: debugOut
+		});
 		
-		config.clickHandler = setActiveTileHandler;
-
-		config.debugOutCallback = debugOut;
+		var allCanvases = $("canvas");
+		Globals.activeTile = allCanvases.get(0);
 		
-		GridMaze.initialize(config);
+		allCanvases.each(function(i) {
+			$(this).mousedown(focusTileHandler);
+		});
 	})();
-
 
 
 	/*****************\

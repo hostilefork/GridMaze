@@ -42,14 +42,16 @@ $(document).ready(function() {
 		debugOut('hoverY', y);
 		debugOut('hoverX', x);
 	}
-	
-	(function() {
-		var config = new GridMaze.Config();
+
+	// Code local to this module that runs only once...
+	(function () {
+		GridMaze.initialize();
+
+		var allCanvases = $("canvas");
 		
-		config.clickHandler = toggleWallHandler;
-		
-		config.hoverHandler = debugHoverPointHandler;
-		
-		GridMaze.initialize(config);
+		allCanvases.each(function(i) {
+			$(this).mousedown(toggleWallHandler);
+			$(this).mousemove(debugHoverPointHandler);
+		});
 	})();
 });

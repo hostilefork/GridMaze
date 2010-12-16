@@ -38,18 +38,6 @@ var Globals = {
 
 
 
-/*************************\
-** Configuration options **
-\*************************/
-
-GridMaze.Config = function() {
-	this.clickHandler = null;
-	this.hoverHandler = null;
-	this.debugOutCallback = null;
-};
-
-
-
 /**************************\
 ** Initialize Wall Arrays **
 \**************************/
@@ -437,16 +425,20 @@ GridMaze.getTileFromCanvas = function(canvas) {
 	throw "getTileFromCanvas failed";
 };
 
-GridMaze.initialize = function(config) {
+GridMaze.initialize = function(settings) {
 	if (Globals.tiles) {
 		throw "Gridmaze is already initialized!";
 	}
 	
-	if (!config) {
-		Globals.config = new GridMaze.config();
-	} else {
-		Globals.config = config;
+	var config = {
+		debugOutCallback: null
+	};
+	
+	if (settings) {
+		$.extend(config, settings);
 	}
+	
+	Globals.config = config;
 	
 	Globals.tiles = createTileArray();
 	if (!Globals.tiles.length) {
@@ -456,9 +448,6 @@ GridMaze.initialize = function(config) {
 	for(var index = 0; index < Globals.tiles.length; index++) {
 		var tile = Globals.tiles[index];
 		var canvas = tile.getCanvas();
-
-		$(canvas).mousedown(Globals.config.clickHandler);
-		$(canvas).mousemove(Globals.config.hoverHandler);
 
 		drawTile(tile);
 	}
