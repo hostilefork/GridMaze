@@ -26,6 +26,7 @@
 			advancedShapes: false,
 			shapeSpeed: 200,
 			showTrail: false,
+			trailHtml: ".", // +HF
 			trailSpeed: 50,
 			eventLimit: 5000,
 			eventHandler: function (eventName, compassPoint) {
@@ -166,7 +167,9 @@
 		// Displays a trail for the mouse movement
 		function TrackTrail() {
 			if (underEvent) {
-				$Body.append("<div class=\"" + config.classModifier + "motion\" style=\"position: absolute; top: " + gesturesY + "px; left :" + gesturesX + "px;\">.</div>");
+				/* $Body.append("<div class=\"" + config.classModifier + "motion\" style=\"position: absolute; top: " + gesturesY + "px; left :" + gesturesX + "px;\">.</div>"); */ // -HF
+				$Body.append("<div class=\"" + config.classModifier + "motion\" style=\"position: absolute; top: " + gesturesY + "px; left :" + gesturesX + "px;\">" + config.trailHtml + "</div>"); // +HF
+
 				trailTimer = window.setTimeout(TrackTrail, config.trailSpeed);
 			}
 		}

@@ -31,6 +31,7 @@ $(document).ready(function() {
 		allCanvases.each(function(i) {
 			$(this).gestures({
 				showTrail: true,
+				trailHtml: '<img src="yellow-star.png" />',
 				eventHandler: spinTileHandler,
 				advancedShapes: false
 			});
