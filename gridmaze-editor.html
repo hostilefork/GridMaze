@@ -7,6 +7,18 @@
 		<!-- Google hosted library: http://code.google.com/apis/libraries/devguide.html -->
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js" type="text/javascript"></script>
 
+		<!--
+			http://sylvester.jcoglan.com/
+			
+			The HTML5 canvas offers transformation and rotation, but no way after
+			you have drawn to tell where the transformed points are on the real
+			screen coordinates.  This library is overkill and can be stripped
+			down later to just the minimum needed for this code:
+			
+			http://stackoverflow.com/questions/849785/get-un-translated-un-rotated-x-y-coordinate-of-a-point-from-a-javascript-canva
+		-->
+		<script src="sylvester-0-1-3/sylvester.js" type="text/javascript"></script>
+
 		<script src="js/gridmaze-tiles.js" type="text/javascript"></script>
 		<link rel="stylesheet" type="text/css" href="gridmaze.css" />
 
