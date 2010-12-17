@@ -9,9 +9,13 @@ body {
  * HTML5 canvas has no border/margin/padding attributes.
  */
 canvas {
-	border: 0;
-	margin: 0;
-	padding: 0;
+    margin: -2px;
+    padding: 0px;
+    border: 3px solid white;
+    outline: 0;
+    font-size: 100%;
+    vertical-align: baseline;
+    background: transparent;
 }
 
 .blueclass {
@@ -21,3 +25,4 @@ canvas {
 .greenclass {
 	color: green;
 }
+

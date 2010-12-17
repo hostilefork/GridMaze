@@ -13,17 +13,27 @@ $(document).ready(function() {
 		$("#" + id).text(text);
 	}
 	
-	function focusTileHandler(event) {
-		//var oldCanvasID = Globals.activeTile.getCanvas().id;
-		//$(oldCanvasID).css("border", "0px");
-	
-		var tile = GridMaze.getTileFromCanvas(this);
+	function setActiveTile(tile) {
+		if (!tile) {
+			throw "setActiveTile requires valid tile!";
+		}
+		
+		if (Globals.activeTile != null) {
+			var oldCanvasID = Globals.activeTile.getCanvas().id;
+			$("#" + oldCanvasID).css("border", "3px solid white");
+		}
+		
 		Globals.activeTile = tile;
-	
-		//var newCanvasID = Globals.activeTile.getCanvas().id;
-		//$(newCanvasID).css("border", "2px solid red");
+		
+		var newCanvasID = Globals.activeTile.getCanvas().id;
+		$("#" + newCanvasID).css("border", "3px dotted red");
 	
 		debugOut('output', "Active Tile = " + tile.getCanvas().id);
+	}
+	
+	function focusTileHandler(event) {
+		var tile = GridMaze.getTileFromCanvas(this);
+		setActiveTile(tile);	
 	}
 	
 	// Code local to this module that runs only once...
@@ -33,7 +43,7 @@ $(document).ready(function() {
 		});
 		
 		var allCanvases = $("canvas");
-		Globals.activeTile = allCanvases.get(0);
+		setActiveTile(GridMaze.getTileFromCanvas(allCanvases.get(0)));
 		
 		allCanvases.each(function(i) {
 			$(this).mousedown(focusTileHandler);

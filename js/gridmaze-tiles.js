@@ -58,7 +58,7 @@ function createRandomized2DArray(columns, rows) {
 	for (var c = 0; c < columns; c++) {
 		arr[c] = [];
 		for (var r = 0; r < rows; r++) {
-			var value = Math.round(Math.random() + 0.3);
+			var value = Math.round(Math.random() + 0.2);
 			if (value == 1) {
 				arr[c][r] = true;
 			} else {
@@ -81,12 +81,21 @@ function Tile(canvas, walls) {
 		throw "Invalid canvas element passed to Tile(canvas, walls)";
 	}
 	this.canvas = canvas;
-	this.walls = walls;
+
+	// JavaScript by default does not do "deep copying" of arrays.
+	// If we simply return walls then we're actually handing the
+	// user direct references into this tile data, which can be
+	// a problem!  This is why jquery.extend(true, [], ...) is
+	// useful when we accept or return wall values.
+	// http://stackoverflow.com/questions/565430/javascript-deep-copying-an-array-using-jquery/817050#817050
+	this.walls = $.extend(true, [], walls);
+	
 	this.inCatMode = false;
-	this.updateWallsAndDraw = function(wallsArray) {
-		debugOutWalls('newhwall', 'newvwall', wallsArray);
+	this.updateWallsAndDraw = function(walls) {
+		debugOutWalls('newhwall', 'newvwall', walls);
 		
-		this.walls = wallsArray;
+		// See notes about deep copies on this.walls.
+		this.walls = $.extend(true, [], walls);
 		
 		debugOutWalls('newTileHwall', 'newTileVwall', this.walls);
 		drawTile(this);
@@ -97,7 +106,8 @@ function Tile(canvas, walls) {
 		return canvas;
 	};
 	this.getWalls = function() {
-		return walls;
+		// See notes about deep copies on this.walls.
+		return $.extend(true, [], this.walls);
 	};
 	this.toString = function() {
 		return "I exist";
@@ -149,16 +159,16 @@ function createTileArray() {
 	var canvases = $("canvas");
 	debugOut('output2', "canvases length is " + canvases.length);
 
-	var arr = [];
-	for (var c = 0; c < canvases.length; c++) {
+	var result = [];
+	canvases.each(function(index) {
 		var walls = [
 			createRandomized2DArray(3, 4),
 			createRandomized2DArray(3, 4)
 		];
-		arr[c] = new Tile(canvases[c], walls);
-	}
+		result.push(new Tile(this, walls));
+	});
 	
-	return arr;
+	return result;
 }
 
 
@@ -167,18 +177,12 @@ function createTileArray() {
 ** Draw Current walls and Squares **
 \**********************************/
 
-function drawTileCore(tile, erase) {
+function drawTile(tile) {
 	var canvas = tile.getCanvas();
 	var ctx = canvas.getContext("2d");
 	
-	// set fillStyle to white and fill canvas background
-	if (erase) {
-		ctx.fillStyle = "rgb(255,255,255)";
-		ctx.fillRect(0, 0, canvas.width, canvas.height);
-	}
-	
 	if (tile.inCatMode) {
-		ctx.drawImage(Globals.catImage, 0, 0);
+		ctx.drawImage(Globals.catImage, 0, 0, canvas.width, canvas.height);
 	} else {
 		// generate 3x3 array describing whether tiles are enclosed (t) or not (f)
 		var filledIn = calculateSquaresArray(tile);
@@ -233,21 +237,18 @@ function drawTileCore(tile, erase) {
 	}
 }
 
-function drawTile(tile) {
-	drawTileCore(tile, false);
-}
-
 function drawWall(ctx, wall, length, color) {
-	
-	if (wall == []) {
-		return;
-	}
-		
+
 	ctx.strokeStyle = color;
-	if (wall[0]) {
-		ctx.strokeRect(wall[1] * length, wall[2] * length, length, 2);
-	} else {
-		ctx.strokeRect(wall[2] * length, wall[1] * length, 2, length);
+	switch (wall[0]) {
+		case 0: // Horizontal Wall
+			ctx.strokeRect(wall[1] * length, wall[2] * length, length, 2);
+			break;
+		case 1: // Vertical Wall
+			ctx.strokeRect(wall[2] * length, wall[1] * length, 2, length);
+			break;
+		default:
+			throw "Invalid wall direction, not 0 or 1";
 	}
 }
 
@@ -276,7 +277,7 @@ function isSubtileSurroundedByWalls(tile, x, y) {
 }
 
 function rotateTileWallsLeftAndDraw(tile) {
-// rotate the entire array of walls counter-clockwise, without drawing
+// rotate the entire array of walls counter-clockwise and redraw
 // walls[0] = Horizontal, [1] = Vertical
 
 	debugOut('output', 'Rotating walls Array counter-clockwise!');
@@ -296,10 +297,10 @@ function rotateTileWallsLeftAndDraw(tile) {
 }
 
 function rotateTileWallsRightAndDraw(tile) {
-// rotate the entire array of walls clockwise, without drawing
+// rotate the entire array of walls clockwise, and redraw
 // walls[0] = Horizontal, [1] = Vertical
 
-	debugOut('output', 'Rotating walls Array clockwise!');
+	debugOut('output', 'Rotating walls Array counter-clockwise!');
 	
 	var oldWalls = tile.getWalls();
 	var newWalls = [oldWalls[1], oldWalls[0]];
@@ -321,19 +322,46 @@ function rotateTileWallsRightAndDraw(tile) {
 ** Image Animation **
 \*******************/
 
-function animatedRotateTile(tile, clockwise) {
+function animatedRotateTileCore(tile, clockwise, useRedraw) {
 	var canvas = tile.getCanvas();
 	var ctx = canvas.getContext("2d");
+	ctx.save();
 	
-	var img = new Image();
-	img.src = canvas.toDataURL("image/png");
+	var horizontalCenter = canvas.width / 2;
+	var verticalCenter = canvas.height / 2;
+
+	var img = null;
+	if (!useRedraw) {
+		img = new Image();
+		// This can periodically fail with enigmatic errors in Firefox
+		img.src = canvas.toDataURL("image/png");
+	}
 
 	var steps = 5;
 	
 	var rotorClosure = function() {
 		if (steps > 0) {
+			// We have to clear the background before we transform, because
+			// once we transform our erasing rectangle will be rotated to 
+			// the new position and overwritten...
+			ctx.fillStyle = "rgb(255,255,255)";
+
+			// additional pixel buffer to eliminate artifact lines
+			ctx.fillRect(-1, -1, canvas.width + 2, canvas.height + 2);
+
 			// animated rotation for 75 degrees
-			singleRotateContext(tile, ctx, img, clockwise ? 15 : -15);
+			ctx.translate(horizontalCenter, verticalCenter);
+			ctx.rotate((clockwise ? 15 : -15) * Math.PI/180);
+			ctx.translate(horizontalCenter * -1, verticalCenter * -1);
+
+			if (useRedraw) {
+				drawTile(tile);
+			} else {
+				// If this fails on Firefox, see comments regarding rotorClosure
+				// http://tinymce.moxiecode.com/punbb/viewtopic.php?pid=74384
+				ctx.drawImage(img, 0, 0);
+			}
+
 			window.setTimeout(rotorClosure, 100);
 			steps--;
 		} else {
@@ -352,14 +380,12 @@ function animatedRotateTile(tile, clockwise) {
 		}
 	};
 	
-	ctx.save();
-	
-	// It may seem unnecessary to use a 0 setTimeout here and
+	// It may seem unnecessary to use setTimeout here and
 	// you could just call rotorClosure() directly.  But
 	// Firefox has an apparent bug in the HTML canvas.  Seems 
 	// if get your image with getCanvas().toDataURL(...) and try
 	// to draw it without first returning to the main loop there
-	// can be problems.
+	// can be timing problems.
 	//
 	// Some people work around this with try/catch:
 	//
@@ -367,28 +393,15 @@ function animatedRotateTile(tile, clockwise) {
 	//
 	// But accepting the timeout here since we're already queueing
 	// an animation is the easiest thing to do, and it seems to work
-	window.setTimeout(rotorClosure, 0);	
+	if (useRedraw) {
+		rotorClosure();
+	} else {
+		window.setTimeout(rotorClosure, 100);
+	}
 }
 
-function singleRotateContext(tile, ctx, img, angle) {
-
-	//clear background to white first
-	ctx.fillStyle = "rgb(255,255,255)";
-	
-	// additional pixel buffer to eliminate artifact lines
-	ctx.fillRect(
-			-1,
-			-1,
-			tile.getCanvas().width + 2, 
-			tile.getCanvas().height + 2);
-	
-	ctx.translate(150, 150);
-	ctx.rotate(angle * Math.PI / 180);
-	ctx.translate(-150, -150);
-	
-	// If this fails on Firefox, see comments regarding rotorClosure
-	// http://tinymce.moxiecode.com/punbb/viewtopic.php?pid=74384
-	ctx.drawImage(img, 0, 0);
+function animatedRotateTile(tile, clockwise) {
+	animatedRotateTileCore(tile, clockwise, true);
 }
 
 function debugOut(id, text) {
