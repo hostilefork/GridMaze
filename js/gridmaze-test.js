@@ -42,6 +42,8 @@ $(document).ready(function() {
 			debugOutCallback: debugOut
 		});
 		
+		GridMaze.runWhiteboxTests();
+
 		var allCanvases = $("canvas");
 		setActiveTile(GridMaze.getTileFromCanvas(allCanvases.get(0)));
 		

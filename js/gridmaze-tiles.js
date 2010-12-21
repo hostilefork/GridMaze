@@ -181,6 +181,34 @@ function Tile(canvas, walls, actors) {
 		}
 		return null;
 	};
+	this.equals = function(other) {
+		// there is no TileData class so this is currently just
+		// checking to see if the walls and actors are equal but
+		// not checking if the canvases are equal
+
+		// check walls
+		for (var dir = 0; dir < 2; dir++) {
+			for (var xw = 0; xw < walls[dir].length; xw++) {
+				for (var yw = 0; yw < walls[dir][0].length; yw++) {
+					if (other.walls[dir][xw][yw] != this.walls[dir][xw][yw]) {
+						return false;
+					}
+				}
+			}
+		}
+		
+		// check actors
+		for (var xa = 0; xa < actors.length; xa++) {
+			for (var ya = 0; ya < actors[0].length; ya++) {
+				// object equality test, must be identical references
+				if (other.actors[xa][ya] !== this.actors[xa][ya]) {
+					return false;
+				}
+			}
+		}
+		
+		return true;
+	};
 }
 
 function createTileArray() {
@@ -354,7 +382,7 @@ function isSubtileSurroundedByWalls(tile, x, y) {
 function rotateTileWallsAndActorsLeftAndDraw(tile) {
 // rotate the entire array of walls counter-clockwise and redraw
 // walls[0] = Horizontal, [1] = Vertical
-
+	
 	debugOut('output', 'Rotating walls Array counter-clockwise!');
 	
 	var oldWalls = tile.getWalls();
@@ -504,6 +532,53 @@ GridMaze.initialize = function(settings) {
 		var canvas = tile.getCanvas();
 
 		drawTile(tile);
+	}
+};
+
+// http://en.wikipedia.org/wiki/White-box_testing
+GridMaze.runWhiteboxTests = function() {
+	// Given a string starting with "<", jQuery will generate DOM
+	// elements out of the HTML text you provide.
+	var testCanvas1 = $('<canvas id="testcanvas1"></canvas>').get(0);
+	var testCanvas2 = $('<canvas id="testcanvas2"></canvas>').get(0);
+
+	// REVIEW: comprehensive fixes needed to make sure all routines
+	// work on sizes other than 3x3 tiles.  Note the Sylvester library
+	// (which is already being included) has Matrix equality and some
+	// nice routines:
+	//
+	//     http://sylvester.jcoglan.com/api/matrix
+	//
+	// It may not be happy about storing objects instead of numbers.
+	for (var tileSize = 3; tileSize <= 3; tileSize++) {
+		for (var iteration = 0; iteration < 10; iteration++ ) {
+			var walls = [
+				createRandomized2DArray(tileSize, tileSize + 1),
+				createRandomized2DArray(tileSize, tileSize + 1)
+			];
+			var actors = create2DArray(tileSize, tileSize, null);
+			var tile1 = new Tile(testCanvas1, walls, actors);
+			var tile2 = new Tile(testCanvas2, walls, actors);
+			
+			// rotating the original tile right three times
+			// should be equivalent to rotating it left once
+			rotateTileWallsAndActorsRightAndDraw(tile1);
+			rotateTileWallsAndActorsLeftAndDraw(tile2);
+			rotateTileWallsAndActorsLeftAndDraw(tile2);
+			rotateTileWallsAndActorsLeftAndDraw(tile2);
+			if (!tile1.equals(tile2)) {
+				throw("rotation test failed; three lefts don't make a right.");
+			}
+			
+			// note that since every tile is assumed to be bound
+			// to a canvas, we can't work with the data without
+			// also working with the notion of drawing.  This
+			// complicates testing of the tile's internal data,
+			// and suggests perhaps "TileData" deserves its
+			// own class and manipulation functions.  But notice
+			// how removing the notion of an "active tile" made
+			// this easier.
+		}
 	}
 };
 
